@@ -1,23 +1,14 @@
 public class LinkedQueue<T> implements QueueInterface<T> {
     
-    private T[] queue;
-    private int size;
-
-    private int front;
-    private int back;
+    LLNode<T> front;
+    LLNode<T> back;
+    int size;
 
     public LinkedQueue() {
-        queue = (T[]) new Object[4];
+        front = new LLNode<T>(null);
+        back = new LLNode<T>(null);
+        back.setLink(front);
         size = 0;
-        front = -1;
-        back = -1;
-    }
-
-    private int next(int index) {
-        if (index == queue.length - 1) {
-            return 0;
-        }
-        return index + 1;
     }
 
     public int size() {
@@ -30,31 +21,18 @@ public class LinkedQueue<T> implements QueueInterface<T> {
 
     public T add(T element) {
 
-        if (size == queue.length) {
-            T[] hold = (T[]) new Object[queue.length * 2];
-
-            int index = 0;
-            for (int i = front; i < queue.length; i++) {
-                hold[index] = queue[i];
-                index++;
-            }
-            for (int i = 0; i < front; i++) {
-                hold[index] = queue[i];
-                index++;
-            }
-
-            front = 0;
-            back = queue.length - 1;
-
-            queue = hold;
-        }
-
-        queue[next(back)] = element;
-
-        back = next(back);
         if (size == 0) {
-            front = next(back);
+            front.setInfo(element);
         }
+        else if (size == 1) {
+            back.setInfo(element);
+        }
+        else {
+            LLNode<T> next = new LLNode(element);
+            next.setLink(back);
+            back = next;
+        }
+
         size++;
 
         return element;
@@ -64,7 +42,7 @@ public class LinkedQueue<T> implements QueueInterface<T> {
         if (size == 0) {
             throw new QueueUnderflowException("No elements in queue.");
         }
-        return queue[front];
+        return front.getInfo();
     }
 
     public T remove() throws QueueUnderflowException {
@@ -72,47 +50,37 @@ public class LinkedQueue<T> implements QueueInterface<T> {
             throw new QueueUnderflowException("No elements in queue.");
         }
 
-        if (size <= queue.length / 4) {
-            T[] hold = (T[]) new Object[queue.length / 2];
+        T element = front.getInfo();
 
-            int index = 0;
-            if (front < back) {
-                for (int i = front; i <= back; i++) {
-                    hold[index] = queue[i];
-                    index++;
-                }
-            }
-            else if (front > back) {
-                for (int i = front; i < queue.length; i++) {
-                    hold[index] = queue[i];
-                    index++;
-                }
-                for (int i = 0; i <= back; i++) {
-                    hold[index] = queue[i];
-                    index++;
-                }
-            }
-            else if (front == back) {
-                hold[0] = queue[front];
-            }
-
-            front = 0;
-            back = queue.length-1;
-            queue = hold;
+        if (size == 1) {
+            front.setInfo(null);
+            size--;
+            return element;
+        }
+        else if (size == 2) {
+            front.setInfo(back.getInfo());
+            back.setInfo(null);
+            size--;
+            return element;
+        }
+        
+        LLNode<T> current = back;
+        while (current.getLink() != front) {
+            current = current.getLink();
         }
 
-        T element = queue[front];
-        queue[front] = null;
-        front = next(front);
+        current.setLink(null);
+        front = current;
+
         size--;
 
         return element;
     }
 
     public void clear() {
-        for (int i = 0; i < queue.length; i++) {
-            queue[i] = null;
-        }
+        front = new LLNode<T>(null);
+        back = new LLNode<T>(null);
+        back.setLink(front);
         size = 0;
     }
 }

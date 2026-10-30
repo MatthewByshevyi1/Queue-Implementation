@@ -53,7 +53,7 @@ public class ArrayQueue<T> implements QueueInterface<T> {
 
         back = next(back);
         if (size == 0) {
-            front = next(back);
+            front = back;
         }
         size++;
 
@@ -72,7 +72,7 @@ public class ArrayQueue<T> implements QueueInterface<T> {
             throw new QueueUnderflowException("No elements in queue.");
         }
 
-        if (size <= queue.length / 4) {
+        if (size <= queue.length / 4 && queue.length >= 4) {
             T[] hold = (T[]) new Object[queue.length / 2];
 
             int index = 0;
@@ -97,7 +97,7 @@ public class ArrayQueue<T> implements QueueInterface<T> {
             }
 
             front = 0;
-            back = queue.length-1;
+            back = size-1;
             queue = hold;
         }
 
@@ -105,6 +105,11 @@ public class ArrayQueue<T> implements QueueInterface<T> {
         queue[front] = null;
         front = next(front);
         size--;
+
+        if (size == 0) {
+            front = -1;
+            back = -1;
+        }
 
         return element;
     }
@@ -114,5 +119,7 @@ public class ArrayQueue<T> implements QueueInterface<T> {
             queue[i] = null;
         }
         size = 0;
+        front = -1;
+        back = -1;
     }
 }
